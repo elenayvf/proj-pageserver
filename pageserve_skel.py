@@ -47,8 +47,8 @@ def serve(sock, func):
     """
     while True:
         print("Attempting to accept a connection on {}".format(sock))
-        (clientsocket, address) = sock.accept()
-        _thread.start_new_thread(func, (clientsocket,))
+        (clientsocket, address) = sock.accept() #listening for request to come in. creates a socket and creates an address (of client) 
+        _thread.start_new_thread(func, (clientsocket,)) #web page of cat
 
 
 CAT = """
@@ -65,15 +65,36 @@ def respond(sock):
     sent = 0
     request = sock.recv(1024)  # We accept only short requests
     request = str(request, encoding='utf-8', errors='strict')
-    print("\nRequest was {}\n".format(request))
+    print("\nRequest was {}\n".format(request))#debugging code. run this code to see what the request looked like. like foo.html, look for this and send the file. 
 
     parts = request.split()
     if len(parts) > 1 and parts[0] == "GET":
-        transmit("HTTP/1.0 200 OK\n\n", sock)
-        transmit(CAT, sock)
+        address_unedit = parts[1]
+        if "~" in address_unedit or "//" in address_unedit or ".." in address_unedit:
+            transmit("HTTP/1.0 403 Forbidden\n\n", sock)
+            transmit("403 Forbidden\n\n",sock)
+        elif address_unedit.endswith(".html") or address_unedit.endswith(".css"):
+            try:
+                htmlcss_file = address_unedit[1:]
+                file = open(htmlcss_file,'r')
+                line_list =[]
+                for line in file:
+                    line_list.append(line)
+                final_string = " ".join(line_list)
+                transmit("HTTP/1.0 200 OK\n\n", sock)
+                transmit(final_string,sock)
+            except IOError:
+                transmit("HTTP/1.0 404 Not Found\n\n", sock)
+                transmit("404 Not Found\n\n",sock)
+    
+        else:
+            transmit("HTTP/1.0 403 Forbidden\n\n", sock) #forbidden error
+            transmit("403 Forbidden\n\n",sock)
+            
+        
     else:
-        transmit("\nI don't handle this request: {}\n".format(request), sock)
-
+        transmit("HTTP/1.0 400 Bad Request\n\n", sock)
+        transmit("404 Not Found\n\n",sock)
     sock.close()
 
     return
@@ -92,6 +113,6 @@ def main():
     print("Listening on port {}".format(port))
     print("Socket is {}".format(sock))
     serve(sock, respond)
-
+    
 main()
     
