@@ -6,11 +6,8 @@ Socket programming in Python
   This trivial implementation is not robust:  We have omitted decent
   error handling and many other things to keep the illustration as simple
   as possible. 
-
-  FIXME:
-  Currently this program always serves an ascii graphic of a cat.
-  Change it to serve files if they end with .html and are in the current directory
 """
+
 
 import socket    # Basic TCP/IP communication on the internet
 import random    # To pick a port at random, giving us some chance to pick a port not in use
@@ -70,21 +67,21 @@ def respond(sock):
     parts = request.split()
     if len(parts) > 1 and parts[0] == "GET":
         address_unedit = parts[1]
-        if "~" in address_unedit or "//" in address_unedit or ".." in address_unedit:
-            transmit("HTTP/1.0 403 Forbidden\n\n", sock)
-            transmit("403 Forbidden\n\n",sock)
-        elif address_unedit.endswith(".html") or address_unedit.endswith(".css"):
+        if "~" in address_unedit or "//" in address_unedit or ".." in address_unedit: #checks for illegal characters in  url for security
+            transmit("HTTP/1.0 403 Forbidden\n\n", sock) #tells computer there is a error
+            transmit("403 Forbidden\n\n",sock) #forbidden error
+        elif address_unedit.endswith(".html") or address_unedit.endswith(".css"): #makes sure html or css files
             try:
                 htmlcss_file = address_unedit[1:]
                 file = open(htmlcss_file,'r')
-                line_list =[]
+                line_list =[] #list of strings to be complied into something sendable
                 for line in file:
                     line_list.append(line)
-                final_string = " ".join(line_list)
+                final_string = " ".join(line_list)#create one big string to send over transmit
                 transmit("HTTP/1.0 200 OK\n\n", sock)
                 transmit(final_string,sock)
             except IOError:
-                transmit("HTTP/1.0 404 Not Found\n\n", sock)
+                transmit("HTTP/1.0 404 Not Found\n\n", sock)#tells computer there is a error
                 transmit("404 Not Found\n\n",sock)
     
         else:
@@ -93,7 +90,7 @@ def respond(sock):
             
         
     else:
-        transmit("HTTP/1.0 400 Bad Request\n\n", sock)
+        transmit("HTTP/1.0 400 Bad Request\n\n", sock)#tells computer there is a error
         transmit("404 Not Found\n\n",sock)
     sock.close()
 

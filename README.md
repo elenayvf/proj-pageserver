@@ -1,3 +1,7 @@
+# Name: Elena Y. Vega-Fujioka
+
+# ix link: eyv@ix-trusty: ~/public_html/cis399/htbin/proj-pageserver
+
 # README #
 
 A "getting started" project for CIS 322, software engineering 1 at University of Oregon.
